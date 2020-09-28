@@ -1,0 +1,10 @@
+/__pycache__/
+Lib/
+Scripts/
+Include/
+*.pyc
+pyvenv.cfg
+
+/.idea
+*.iml
+venv.cmd
