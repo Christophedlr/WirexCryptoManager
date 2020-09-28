@@ -1,4 +1,6 @@
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QPushButton, QTableWidget, QHBoxLayout, QVBoxLayout, QSpacerItem, QHeaderView
+from manager.windows.QTransactionsAdd import QTransactionsAdd
 
 
 # Window for list transactions
@@ -32,3 +34,10 @@ class QTransactionsList(QWidget):
         vertical_layout = QVBoxLayout(self)
         vertical_layout.addWidget(table_widget)
         vertical_layout.addLayout(horizontal_layout)
+
+        add_button.clicked.connect(self.on_clicked_add_button)
+
+    def on_clicked_add_button(self):
+        self.add = QTransactionsAdd()
+        self.add.setWindowModality(Qt.ApplicationModal)
+        self.add.show()
