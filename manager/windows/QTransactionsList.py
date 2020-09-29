@@ -1,10 +1,16 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QPushButton, QTableWidget, QHBoxLayout, QVBoxLayout, QSpacerItem, QHeaderView
+from PyQt5.QtWidgets import QWidget, QPushButton, QTableWidget, QHBoxLayout, QVBoxLayout, QSpacerItem, QHeaderView, QTableWidgetItem
 from manager.windows.QTransactionsAdd import QTransactionsAdd
+from manager.entities.TransactionsEntity import TransactionsEntity
+from sqlalchemy.orm import sessionmaker
+from manager.common.sqlalchemy import engine
 
 
 # Window for list transactions
 class QTransactionsList(QWidget):
+    Session: sessionmaker = sessionmaker(bind=engine)
+    entities: Session = Session()
+
     def __init__(self):
         super().__init__()
 
@@ -36,8 +42,19 @@ class QTransactionsList(QWidget):
         vertical_layout.addLayout(horizontal_layout)
 
         add_button.clicked.connect(self.on_clicked_add_button)
+        self.reload_transactions(table_widget)
 
     def on_clicked_add_button(self):
         self.add = QTransactionsAdd()
         self.add.setWindowModality(Qt.ApplicationModal)
         self.add.show()
+
+    # Reload transactions from database
+    def reload_transactions(self, table_widget: QTableWidget):
+        transactions = self.entities.query(TransactionsEntity).all()
+
+        for transaction in transactions:
+            table_widget.insertRow(table_widget.rowCount())
+            table_widget.setItem(table_widget.rowCount()-1, 0, QTableWidgetItem(transaction.date.strftime("%d/%m/%Y")))
+            table_widget.setItem(table_widget.rowCount()-1, 1, QTableWidgetItem(transaction.currency))
+            table_widget.setItem(table_widget.rowCount()-1, 2, QTableWidgetItem('{:.8f}'.format(transaction.amount)))
