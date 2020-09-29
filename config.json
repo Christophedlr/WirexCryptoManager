@@ -1,0 +1,5 @@
+{
+  "database": "default.sqlite",
+  "path": "ROOT_DIR",
+  "type": "sqlite"
+}
