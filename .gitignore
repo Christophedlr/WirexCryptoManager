@@ -8,3 +8,4 @@ pyvenv.cfg
 /.idea
 *.iml
 venv.cmd
+*.sqlite

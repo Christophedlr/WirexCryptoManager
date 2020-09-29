@@ -1,9 +1,25 @@
 from PyQt5.QtCore import QDate
 from PyQt5.QtWidgets import QWidget, QPushButton, QComboBox, QTextEdit, QDateEdit, QDoubleSpinBox, QHBoxLayout, \
-    QVBoxLayout, QLabel, QSpacerItem
+    QVBoxLayout, QLabel, QSpacerItem, QMessageBox
+from manager.common.sqlalchemy import engine
+from sqlalchemy.orm import sessionmaker
+from manager.entities.TransactionsEntity import TransactionsEntity
+from PyQt5.QtCore import Qt
 
 
 class QTransactionsAdd(QWidget):
+    Session: sessionmaker = sessionmaker(bind=engine)
+    entities: Session = Session()
+
+    label_date: QLabel
+    label_currency: QLabel
+    label_currency: QLabel
+    label_type: QLabel
+    label_amount: QLabel
+    label_describe: QLabel
+    date: QDateEdit
+    describe: QTextEdit
+
     def __init__(self):
         super().__init__()
 
@@ -11,62 +27,66 @@ class QTransactionsAdd(QWidget):
         self.resize(950, 450)
 
         # QLabels
-        label_date = QLabel("Date of transaction :")
-        label_currency = QLabel("Currency :")
-        label_type = QLabel("Type of transaction :")
-        label_amount = QLabel("Amount :")
-        label_describe = QLabel("Describe :")
+        self.label_date = QLabel("Date of transaction :")
+        self.label_currency = QLabel("Currency :")
+        self.label_type = QLabel("Type of transaction :")
+        self.label_amount = QLabel("Amount :")
+        self.label_describe = QLabel("Describe :")
 
-        date = QDateEdit(QDate.currentDate())
-        date.setDisplayFormat("dd/MM/yyyy")
+        # Date
+        self.date = QDateEdit(QDate.currentDate())
+        self.date.setDisplayFormat("dd/MM/yyyy")
 
         # Currencies combobox
-        currency = QComboBox()
-        currency.addItem("BTC")
-        currency.addItem("ETH")
-        currency.addItem("LTC")
-        currency.addItem("WXT")
-        currency.addItem("XRP")
-        currency.addItem("XLM")
-        currency.addItem("WAVES")
-        currency.addItem("WLO")
-        currency.addItem("DAI")
-        currency.addItem("NANO")
-        currency.addItem("EUR")
-        currency.addItem("USD")
+        self.currency = QComboBox()
+        self.currency.addItem("BTC")
+        self.currency.addItem("ETH")
+        self.currency.addItem("LTC")
+        self.currency.addItem("WXT")
+        self.currency.addItem("XRP")
+        self.currency.addItem("XLM")
+        self.currency.addItem("WAVES")
+        self.currency.addItem("WLO")
+        self.currency.addItem("DAI")
+        self.currency.addItem("NANO")
+        self.currency.addItem("EUR")
+        self.currency.addItem("USD")
 
-        type_transaction = QComboBox()
-        type_transaction.addItem("Credits")
-        type_transaction.addItem("Debits")
+        self.type_transaction = QComboBox()
+        self.type_transaction.addItem("Credits")
+        self.type_transaction.addItem("Debits")
 
-        amount = QDoubleSpinBox()
-        amount.setValue(0)
+        self.amount = QDoubleSpinBox()
+        self.amount.setValue(0)
+        self.amount.setDecimals(8)
+        self.amount.setSingleStep(0.00000001)
+        self.amount.setSuffix(" "+self.currency.currentText())
 
         spacer_describe = QSpacerItem(1, 15)
-        describe = QTextEdit()
+        self.describe = QTextEdit()
 
         validate_button = QPushButton("Validate")
         cancel_button = QPushButton("Cancel")
 
         # Vertical layout for date
         vlayout_date = QVBoxLayout()
-        vlayout_date.addWidget(label_date)
-        vlayout_date.addWidget(date)
+        vlayout_date.addWidget(self.label_date)
+        vlayout_date.addWidget(self.date)
 
         # Vertical layout for currencies
         vlayout_currency = QVBoxLayout()
-        vlayout_currency.addWidget(label_currency)
-        vlayout_currency.addWidget(currency)
+        vlayout_currency.addWidget(self.label_currency)
+        vlayout_currency.addWidget(self.currency)
 
         # Vertical layout for type of transaction
         vlayout_type = QVBoxLayout()
-        vlayout_type.addWidget(label_type)
-        vlayout_type.addWidget(type_transaction)
+        vlayout_type.addWidget(self.label_type)
+        vlayout_type.addWidget(self.type_transaction)
 
         # Vertical layout for amount
         vlayout_amount = QVBoxLayout()
-        vlayout_amount.addWidget(label_amount)
-        vlayout_amount.addWidget(amount)
+        vlayout_amount.addWidget(self.label_amount)
+        vlayout_amount.addWidget(self.amount)
 
         # Horizontal layout for transaction form
         hlayout_transaction = QHBoxLayout()
@@ -78,8 +98,8 @@ class QTransactionsAdd(QWidget):
         # Vertical layout for describe
         vlayout_describe = QVBoxLayout()
         vlayout_describe.addSpacerItem(spacer_describe)
-        vlayout_describe.addWidget(label_describe)
-        vlayout_describe.addWidget(describe)
+        vlayout_describe.addWidget(self.label_describe)
+        vlayout_describe.addWidget(self.describe)
 
         spacer_desc_buttons = QSpacerItem(1, 180)
 
@@ -106,5 +126,26 @@ class QTransactionsAdd(QWidget):
         # Add signal event in clicked cancel button
         cancel_button.clicked.connect(self.on_clicked_cancel_button)
 
+        # Add signal event in clicked validate button
+        validate_button.clicked.connect(self.on_clicked_validate_button)
+
+        # Add signal event in change currency ComboBox
+        self.currency.currentTextChanged.connect(self.on_currenttextchanged_currency_combobox)
+
     def on_clicked_cancel_button(self):
+        self.close()
+
+    def on_currenttextchanged_currency_combobox(self):
+        self.amount.setSuffix(" "+self.currency.currentText())
+
+    def on_clicked_validate_button(self):
+        transaction = TransactionsEntity()
+        transaction.date = self.date.date().toPyDate()
+        transaction.currency = self.currency.currentText()
+        transaction.type = self.type_transaction.currentIndex()
+        transaction.amount = self.amount.value()
+        transaction.describe = self.describe.toPlainText()
+
+        self.entities.add(transaction)
+        self.entities.commit()
         self.close()
