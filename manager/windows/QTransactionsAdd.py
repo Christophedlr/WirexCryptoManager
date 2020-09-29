@@ -148,13 +148,4 @@ class QTransactionsAdd(QWidget):
 
         self.entities.add(transaction)
         self.entities.commit()
-
-        msg = QMessageBox()
-        msg.buttonClicked.connect(self.on_clicked_button_messagebox)
-        msg.setIcon(QMessageBox.Information)
-        msg.setText("Transaction has been added in database")
-        msg.setWindowTitle("Add confirmation")
-        msg.show()
-
-    def on_clicked_button_messagebox(self):
         self.close()
