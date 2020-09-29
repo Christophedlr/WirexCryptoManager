@@ -1,15 +1,10 @@
 import sys
-from manager import app
-from manager.common.sqlalchemy import engine, Base
-from manager.entities import TransactionsEntity
+from PyQt5.QtWidgets import QApplication
+from manager.windows.QTransactionsList import QTransactionsList
 
-
-def init_db():
-    Base.metadata.create_all(engine)
-
+app = QApplication(sys.argv)
+transactions_list = QTransactionsList()
+transactions_list.show()
 
 if __name__ == "__main__":
-    if sys.argv[1] == "init-db":
-        init_db()
-    else:
-        app.exec_()
+    app.exec_()
