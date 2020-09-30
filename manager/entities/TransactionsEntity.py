@@ -12,3 +12,6 @@ class TransactionsEntity(Base):
     type = Column(unsigned_int, index=True, default=0)
     amount = Column(Float)
     describe = Column(Text)
+    btc = Column(unsigned_int, nullable=True)
+    eur = Column(unsigned_int, nullable=True)
+    usd = Column(unsigned_int, nullable=True)
