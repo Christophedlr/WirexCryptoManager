@@ -1,10 +1,11 @@
 from PyQt5.QtCore import QDate
 from PyQt5.QtWidgets import QWidget, QPushButton, QComboBox, QTextEdit, QDateEdit, QDoubleSpinBox, QHBoxLayout, \
-    QVBoxLayout, QLabel, QSpacerItem, QMessageBox
+    QVBoxLayout, QLabel, QSpacerItem
 from manager.common.sqlalchemy import engine
 from sqlalchemy.orm import sessionmaker
 from manager.entities.TransactionsEntity import TransactionsEntity
-from PyQt5.QtCore import Qt
+import requests
+import json
 
 
 class QTransactionsAdd(QWidget):
@@ -60,7 +61,7 @@ class QTransactionsAdd(QWidget):
         self.amount.setValue(0)
         self.amount.setDecimals(8)
         self.amount.setSingleStep(0.00000001)
-        self.amount.setSuffix(" "+self.currency.currentText())
+        self.amount.setSuffix(" " + self.currency.currentText())
 
         spacer_describe = QSpacerItem(1, 15)
         self.describe = QTextEdit()
@@ -136,7 +137,7 @@ class QTransactionsAdd(QWidget):
         self.close()
 
     def on_currenttextchanged_currency_combobox(self):
-        self.amount.setSuffix(" "+self.currency.currentText())
+        self.amount.setSuffix(" " + self.currency.currentText())
 
     def on_clicked_validate_button(self):
         transaction = TransactionsEntity()
@@ -145,7 +146,46 @@ class QTransactionsAdd(QWidget):
         transaction.type = self.type_transaction.currentIndex()
         transaction.amount = self.amount.value()
         transaction.describe = self.describe.toPlainText()
+        transaction.btc = self.calc_price(self.currency.currentText(), 'BTC')
+        transaction.eur = self.calc_price(self.currency.currentText(), 'EUR')
+        transaction.usd = self.calc_price(self.currency.currentText(), 'USD')
 
         self.entities.add(transaction)
         self.entities.commit()
         self.close()
+
+    def calc_price(self, crypto, currency_dest='EUR') -> float:
+        price: float = 0
+        value: float = 0
+        url = 'https://api.coinbase.com/v2/prices/'
+
+        if crypto == "ETH" or crypto == "LTC" or crypto == "XRP" or crypto == "XLM" or crypto == "DAI":
+            if self.type_transaction.currentIndex() == 0:
+                if currency_dest == 'BTC':
+                    price = float(json.loads(requests.get(url + crypto + '-' + 'USD/sell').content)['data']['amount'])
+                    value = self.amount.value() * price
+
+                    price = float(json.loads(requests.get(url + 'BTC-USD/sell').content)['data']['amount'])
+                    value = value / price
+                else:
+                    price = float(json.loads(requests.get(url + crypto + '-'+currency_dest+'/sell').content)['data']['amount'])
+                    value = self.amount.value() * price
+            else:
+                if currency_dest == 'BTC':
+                    price = float(json.loads(requests.get(url + crypto + '-' + 'USD/buy').content)['data']['amount'])
+                    value = self.amount.value() * price
+
+                    price = float(json.loads(requests.get(url + 'BTC-USD/buy').content)['data']['amount'])
+                    value = value / price
+                else:
+                    price = float(json.loads(requests.get(url + crypto + '-'+currency_dest+'/buy').content)['data']['amount'])
+                    value = self.amount.value() * price
+        elif crypto == 'BTC':
+            if self.type_transaction.currentIndex() == 0:
+                price = float(json.loads(requests.get(url + crypto + '-' + currency_dest + '/sell').content)['data']['amount'])
+                value = self.amount.value() * price
+            else:
+                price = float(json.loads(requests.get(url + crypto + '-' + currency_dest + '/buy').content)['data']['amount'])
+                value = self.amount.value() * price
+
+        return value
