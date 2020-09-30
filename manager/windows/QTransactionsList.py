@@ -14,6 +14,7 @@ class QTransactionsList(QWidget):
     def __init__(self):
         super().__init__()
 
+        self.add = QTransactionsAdd()
         self.setWindowTitle(self.tr('List of transactions'))
         self.resize(947, 690)
 
@@ -45,7 +46,6 @@ class QTransactionsList(QWidget):
         self.reload_transactions(table_widget)
 
     def on_clicked_add_button(self):
-        self.add = QTransactionsAdd()
         self.add.setWindowModality(Qt.ApplicationModal)
         self.add.show()
 
