@@ -1,9 +1,14 @@
 /__pycache__/
 Lib/
+lib/
 Scripts/
 Include/
+include/
+share/
+bin/
 *.pyc
 pyvenv.cfg
+lib*
 
 /.idea
 *.iml
