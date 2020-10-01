@@ -55,10 +55,12 @@ class QTransactionsList(QWidget):
 
     def on_clicked_add_button(self):
         self.add.setWindowModality(Qt.ApplicationModal)
+        self.add.closed.connect(self.on_closed_transactions_add)
         self.add.show()
 
     # Reload transactions from database
     def reload_transactions(self, table_widget: QTableWidget):
+        table_widget.setRowCount(0)
         transactions = self.entities.query(TransactionsEntity).all()
 
         for transaction in transactions:
@@ -75,3 +77,7 @@ class QTransactionsList(QWidget):
         self.details.setWindowModality(Qt.ApplicationModal)
         self.details.setEntity(self.entities.query(TransactionsEntity).filter(TransactionsEntity.id == id).first())
         self.details.show()
+
+    # Call reload all transactions
+    def on_closed_transactions_add(self):
+        self.reload_transactions(table_widget=self.table_widget)

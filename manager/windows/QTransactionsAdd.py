@@ -1,4 +1,5 @@
-from PyQt5.QtCore import QDate
+from PyQt5.QtCore import QDate, pyqtSignal
+from PyQt5.QtGui import QCloseEvent
 from PyQt5.QtWidgets import QWidget, QPushButton, QComboBox, QTextEdit, QDateEdit, QDoubleSpinBox, QHBoxLayout, \
     QVBoxLayout, QLabel, QSpacerItem
 from manager.common.sqlalchemy import engine
@@ -20,6 +21,8 @@ class QTransactionsAdd(QWidget):
     label_describe: QLabel
     date: QDateEdit
     describe: QTextEdit
+
+    closed: pyqtSignal = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -189,3 +192,6 @@ class QTransactionsAdd(QWidget):
                 value = self.amount.value() * price
 
         return value
+
+    def closeEvent(self, a0: QCloseEvent) -> None:
+        self.closed.emit()
