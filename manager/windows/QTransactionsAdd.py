@@ -149,7 +149,12 @@ class QTransactionsAdd(QWidget):
         transaction.type = self.type_transaction.currentIndex()
         transaction.amount = self.amount.value()
         transaction.describe = self.describe.toPlainText()
-        transaction.btc = self.calc_price(self.currency.currentText(), 'BTC')
+
+        if not self.currency.currentText() == 'BTC':
+            transaction.btc = self.calc_price(self.currency.currentText(), 'BTC')
+        else:
+            transaction.btc = 0
+
         transaction.eur = self.calc_price(self.currency.currentText(), 'EUR')
         transaction.usd = self.calc_price(self.currency.currentText(), 'USD')
 
