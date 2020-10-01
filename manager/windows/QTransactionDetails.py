@@ -87,7 +87,6 @@ class QTransactionDetails(QWidget):
         self.close_button.clicked.connect(self.on_clicked_close_button)
 
     def showEvent(self, a0: QShowEvent) -> None:
-        super().__init__()
         self.date.setText(self.entity.date.date().strftime("%d/%m/%Y"))
 
         if self.entity.type == 0:
