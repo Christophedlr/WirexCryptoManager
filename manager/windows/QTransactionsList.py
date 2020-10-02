@@ -1,5 +1,6 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QWidget, QPushButton, QTableWidget, QHBoxLayout, QVBoxLayout, QSpacerItem, QHeaderView, QTableWidgetItem
+from PyQt5.QtWidgets import QWidget, QPushButton, QTableWidget, QHBoxLayout, QVBoxLayout, QSpacerItem, QHeaderView, QTableWidgetItem, QMenu
+from PyQt5.QtGui import QShowEvent, QContextMenuEvent
 from manager.windows.QTransactionsAdd import QTransactionsAdd
 from manager.windows.QTransactionDetails import QTransactionDetails
 from manager.entities.TransactionsEntity import TransactionsEntity
@@ -13,6 +14,7 @@ class QTransactionsList(QWidget):
     entities: Session = Session()
 
     table_widget: QTableWidget
+    context_menu: QMenu
 
     def __init__(self):
         super().__init__()
@@ -50,7 +52,6 @@ class QTransactionsList(QWidget):
         vertical_layout.addLayout(horizontal_layout)
 
         add_button.clicked.connect(self.on_clicked_add_button)
-        new_button.clicked.connect(self.on_clicked_new_button)
         self.reload_transactions(self.table_widget)
 
     def on_clicked_add_button(self):
@@ -70,7 +71,7 @@ class QTransactionsList(QWidget):
             self.table_widget.setItem(self.table_widget.rowCount()-1, 2, QTableWidgetItem(transaction.currency))
             self.table_widget.setItem(self.table_widget.rowCount()-1, 3, QTableWidgetItem('{:.8f}'.format(transaction.amount)))
 
-    def on_clicked_new_button(self):
+    def on_triggered_detail_action(self):
         index = self.table_widget.currentIndex()
         id = int(self.table_widget.item(index.row(), 0).text())
 
@@ -81,3 +82,19 @@ class QTransactionsList(QWidget):
     # Call reload all transactions
     def on_closed_transactions_add(self):
         self.reload_transactions(table_widget=self.table_widget)
+
+    def showEvent(self, a0: QShowEvent) -> None:
+        # disable editable cell
+        for row in range (0, self.table_widget.rowCount()):
+            for col in range(0, 3):
+                item = self.table_widget.item(row, col)
+                item.setFlags(Qt.ItemIsSelectable | Qt.ItemIsEnabled)
+
+    def contextMenuEvent(self, a0: QContextMenuEvent) -> None:
+        # Create QMenu for details transaction
+        self.context_menu = QMenu()
+        detail_action = self.context_menu.addAction("Details")
+        action = self.context_menu.exec_(self.mapToGlobal(a0.pos()))
+
+        if action == detail_action:
+            self.on_triggered_detail_action()
