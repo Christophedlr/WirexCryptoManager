@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QDate, pyqtSignal
-from PyQt5.QtGui import QCloseEvent
+from PyQt5.QtGui import QCloseEvent, QShowEvent
 from PyQt5.QtWidgets import QWidget, QPushButton, QComboBox, QTextEdit, QDateEdit, QDoubleSpinBox, QHBoxLayout, \
     QVBoxLayout, QLabel, QSpacerItem
 from manager.common.sqlalchemy import engine
@@ -30,47 +30,17 @@ class QTransactionsAdd(QWidget):
         self.setWindowTitle("Add a transaction")
         self.resize(950, 450)
 
-        # QLabels
-        self.label_date = QLabel("Date of transaction :")
-        self.label_currency = QLabel("Currency :")
-        self.label_type = QLabel("Type of transaction :")
-        self.label_amount = QLabel("Amount :")
-        self.label_describe = QLabel("Describe :")
-
-        # Date
-        self.date = QDateEdit(QDate.currentDate())
-        self.date.setDisplayFormat("dd/MM/yyyy")
-
-        # Currencies combobox
         self.currency = QComboBox()
-        self.currency.addItem("BTC")
-        self.currency.addItem("ETH")
-        self.currency.addItem("LTC")
-        self.currency.addItem("WXT")
-        self.currency.addItem("XRP")
-        self.currency.addItem("XLM")
-        self.currency.addItem("WAVES")
-        self.currency.addItem("WLO")
-        self.currency.addItem("DAI")
-        self.currency.addItem("NANO")
-        self.currency.addItem("EUR")
-        self.currency.addItem("USD")
-
         self.type_transaction = QComboBox()
-        self.type_transaction.addItem("Credits")
-        self.type_transaction.addItem("Debits")
-
         self.amount = QDoubleSpinBox()
-        self.amount.setValue(0)
-        self.amount.setDecimals(8)
-        self.amount.setSingleStep(0.00000001)
-        self.amount.setSuffix(" " + self.currency.currentText())
-
         spacer_describe = QSpacerItem(1, 15)
         self.describe = QTextEdit()
+        self.date = QDateEdit(QDate.currentDate())
 
         validate_button = QPushButton("Validate")
         cancel_button = QPushButton("Cancel")
+
+        self.fill_fields()
 
         # Vertical layout for date
         vlayout_date = QVBoxLayout()
@@ -198,5 +168,46 @@ class QTransactionsAdd(QWidget):
 
         return value
 
+    def fill_fields(self):
+        self.label_date = QLabel("Date of transaction :")
+        self.label_currency = QLabel("Currency :")
+        self.label_type = QLabel("Type of transaction :")
+        self.label_amount = QLabel("Amount :")
+        self.label_describe = QLabel("Describe :")
+
+        self.currency.clear()
+        self.currency.addItem("BTC")
+        self.currency.addItem("ETH")
+        self.currency.addItem("LTC")
+        self.currency.addItem("WXT")
+        self.currency.addItem("XRP")
+        self.currency.addItem("XLM")
+        self.currency.addItem("WAVES")
+        self.currency.addItem("WLO")
+        self.currency.addItem("DAI")
+        self.currency.addItem("NANO")
+        self.currency.addItem("EUR")
+        self.currency.addItem("USD")
+
+        self.type_transaction.clear()
+        self.type_transaction.addItem("Credits")
+        self.type_transaction.addItem("Debits")
+
+        self.amount.clear()
+        self.amount.setValue(0)
+        self.amount.setDecimals(8)
+        self.amount.setSingleStep(0.00000001)
+        self.amount.setSuffix(" " + self.currency.currentText())
+
+        self.date.clear()
+        self.date.setDisplayFormat("dd/MM/yyyy")
+
+        self.describe.clear()
+
     def closeEvent(self, a0: QCloseEvent) -> None:
+        a0.accept()
+        self.currency.clear()
         self.closed.emit()
+
+    def showEvent(self, a0: QShowEvent) -> None:
+        self.fill_fields()
