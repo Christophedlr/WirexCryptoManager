@@ -6,7 +6,7 @@ from manager.windows.QTransactionsAdd import QTransactionsAdd
 from manager.windows.QTransactionDetails import QTransactionDetails
 from manager.entities.TransactionsEntity import TransactionsEntity
 from sqlalchemy.orm import sessionmaker
-from manager.common.sqlalchemy import engine, Base, json_file
+from manager.common.sqlalchemy import get_engine, Base, json_file
 import json
 import os
 from pathlib import Path
@@ -14,7 +14,7 @@ from pathlib import Path
 
 # Window for list transactions
 class QTransactionsList(QWidget):
-    Session: sessionmaker = sessionmaker(bind=engine)
+    Session: sessionmaker = sessionmaker(bind=get_engine())
     entities: Session = Session()
 
     table_widget: QTableWidget
@@ -128,4 +128,4 @@ class QTransactionsList(QWidget):
         with open("config.json", "w", encoding="utf-8") as f:
             json.dump(json_file, f, ensure_ascii=False, indent=4)
 
-        #Base.metadata.create_all(engine)
+        #Base.metadata.create_all(get_engine())

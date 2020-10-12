@@ -3,6 +3,13 @@ from sqlalchemy.ext.declarative import declarative_base
 import json
 import os
 
+def get_base():
+    return Base
+
+def get_engine():
+    return engine
+
+
 json_file = json.load(open('config.json'))
 database = json_file['database']
 
