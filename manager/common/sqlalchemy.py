@@ -3,6 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 import json
 import os
 
+
 def get_base():
     return Base
 
@@ -10,16 +11,19 @@ def get_engine():
     return engine
 
 
-json_file = json.load(open('config.json'))
-database = json_file['database']
+def load_config():
+    global json_file, path, database
 
-if json_file['path'] == 'ROOT_DIR':
-    path = os.path.dirname(os.path.abspath('__init__.py'))
-else:
-    path = json_file['path']
+    json_file = json.load(open('config.json'))
+    database = json_file['database']
 
-engine = create_engine('sqlite:///'+os.path.abspath(path+'/'+database))
-Base = declarative_base()
+    if json_file['path'] == 'ROOT_DIR':
+        path = os.path.dirname(os.path.abspath('__init__.py'))
+    else:
+        path = json_file['path']
+
+load_config()
+
 database_type = json_file['type']
 
 if database_type == "sqlite":
@@ -28,5 +32,8 @@ if database_type == "sqlite":
 elif database_type == "mysql":
     from sqlalchemy.dialects.mysql import INTEGER
     unsigned_int = INTEGER(unsigned=True)
+
+engine = create_engine('sqlite:///'+os.path.abspath(path+'/'+database))
+Base = declarative_base()
 
 
