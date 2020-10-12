@@ -2,7 +2,7 @@ from PyQt5.QtCore import QDate, pyqtSignal
 from PyQt5.QtGui import QCloseEvent, QShowEvent
 from PyQt5.QtWidgets import QWidget, QPushButton, QComboBox, QTextEdit, QDateEdit, QDoubleSpinBox, QHBoxLayout, \
     QVBoxLayout, QLabel, QSpacerItem
-from manager.common.sqlalchemy import engine
+from manager.common.sqlalchemy import get_engine
 from sqlalchemy.orm import sessionmaker
 from manager.entities.TransactionsEntity import TransactionsEntity
 import requests
@@ -10,7 +10,7 @@ import json
 
 
 class QTransactionsAdd(QWidget):
-    Session: sessionmaker = sessionmaker(bind=engine)
+    Session: sessionmaker = sessionmaker(bind=get_engine())
     entities: Session = Session()
 
     label_date: QLabel
